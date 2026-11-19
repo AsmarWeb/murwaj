@@ -17,7 +17,7 @@
 
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="flex shrink-0 items-center transition hover:opacity-80">
-                    <img src="{{ asset('storage/setting-suggest/' . $setting->logo) }}" alt="murwaj"
+                    <img src="{{ asset('storage/setting-suggest/' . ($setting?->logo ?: 'logo.png')) }}" alt="murwaj"
                         class="h-9 w-auto max-w-[130px] object-contain">
                 </a>
 
@@ -365,7 +365,7 @@
 
             <a href="{{ route('home') }}" @click="mobileOpen = false" class="flex items-center">
 
-                <img src="{{ asset('storage/setting-suggest/' . $setting->logo) }}" alt="murwaj"
+                <img src="{{ asset('storage/setting-suggest/' . ($setting?->logo ?: 'logo.png')) }}" alt="murwaj"
                     class="h-8 w-auto max-w-[120px]">
 
             </a>

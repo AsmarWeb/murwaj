@@ -12,8 +12,8 @@
 
                 {{-- Logo --}}
                 <a href="{{ route('home') }}" class="inline-flex items-center">
-                    @if (!empty($setting->logo))
-                        <img src="{{ asset($setting->logo) }}" alt="{{ config('app.name', 'murwaj') }}"
+                    @if (!empty($setting?->logo))
+                        <img src="{{ asset($setting?->logo) }}" alt="{{ config('app.name', 'murwaj') }}"
                             class="h-12 w-auto object-contain">
                     @else
                         <span class="text-2xl font-bold text-orange-500">
@@ -25,8 +25,8 @@
                 {{-- Description --}}
                 <p class="mt-4 max-w-sm text-sm leading-6 text-gray-500 dark:text-gray-400">
                     {{ app()->getLocale() == 'ar'
-                        ? $setting->short_des_ar ?? ($setting->short_des ?? 'سوق إلكتروني في الإمارات للتسوق والبيع بسهولة وأمان.')
-                        : $setting->short_des ?? 'A UAE marketplace connecting buyers and sellers in one convenient place.' }}
+                        ? $setting?->short_des_ar ?? ($setting?->short_des ?? 'سوق إلكتروني في الإمارات للتسوق والبيع بسهولة وأمان.')
+                        : $setting?->short_des ?? 'A UAE marketplace connecting buyers and sellers in one convenient place.' }}
                 </p>
 
 
@@ -186,8 +186,8 @@
                 <div class="mt-5 space-y-4">
 
                     {{-- UAE Phone --}}
-                    @if ($setting->phone)
-                        <a href="tel:{{ $setting->phone }}" class="group flex items-start gap-3">
+                    @if ($setting?->phone)
+                        <a href="tel:{{ $setting?->phone }}" class="group flex items-start gap-3">
 
                             <span
                                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
@@ -211,7 +211,7 @@
 
                                 <span
                                     class="mt-1 block text-sm font-medium text-gray-700 group-hover:text-orange-500 dark:text-gray-300 dark:group-hover:text-orange-400">
-                                    {{ $setting->phone }}
+                                    {{ $setting?->phone }}
                                 </span>
                             </span>
 
@@ -220,8 +220,8 @@
 
 
                     {{-- Second Phone --}}
-                    @if ($setting->phone2)
-                        <a href="tel:{{ $setting->phone2 }}" class="group flex items-start gap-3">
+                    @if ($setting?->phone2)
+                        <a href="tel:{{ $setting?->phone2 }}" class="group flex items-start gap-3">
 
                             <span
                                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
@@ -245,7 +245,7 @@
 
                                 <span
                                     class="mt-1 block text-sm font-medium text-gray-700 group-hover:text-orange-500 dark:text-gray-300 dark:group-hover:text-orange-400">
-                                    {{ $setting->phone2 }}
+                                    {{ $setting?->phone2 }}
                                 </span>
                             </span>
 
@@ -254,8 +254,8 @@
 
 
                     {{-- Email --}}
-                    @if ($setting->email)
-                        <a href="mailto:{{ $setting->email }}" class="group flex items-start gap-3">
+                    @if ($setting?->email)
+                        <a href="mailto:{{ $setting?->email }}" class="group flex items-start gap-3">
 
                             <span
                                 class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg
@@ -279,7 +279,7 @@
 
                                 <span
                                     class="mt-1 block break-all text-sm font-medium text-gray-700 group-hover:text-orange-500 dark:text-gray-300 dark:group-hover:text-orange-400">
-                                    {{ $setting->email }}
+                                    {{ $setting?->email }}
                                 </span>
                             </span>
 
@@ -288,7 +288,7 @@
 
 
                     {{-- Address --}}
-                    @if ($setting->address)
+                    @if ($setting?->address)
                         <div class="flex items-start gap-3">
 
                             <span
@@ -315,7 +315,7 @@
                                 </span>
 
                                 <span class="mt-1 block text-sm text-gray-600 dark:text-gray-300">
-                                    {{ $setting->address }}
+                                    {{ $setting?->address }}
                                 </span>
                             </span>
 
@@ -484,8 +484,8 @@
             {{-- Social --}}
             <div class="flex items-center gap-2">
 
-                @if ($setting->facebook)
-                    <a href="{{ $setting->facebook }}" target="_blank" rel="noopener noreferrer"
+                @if ($setting?->facebook)
+                    <a href="{{ $setting?->facebook }}" target="_blank" rel="noopener noreferrer"
                         aria-label="Facebook"
                         class="flex h-9 w-9 items-center justify-center rounded-lg
                                bg-gray-100 text-gray-600 transition
@@ -499,8 +499,8 @@
                 @endif
 
 
-                @if ($setting->instagram)
-                    <a href="{{ $setting->instagram }}" target="_blank" rel="noopener noreferrer"
+                @if ($setting?->instagram)
+                    <a href="{{ $setting?->instagram }}" target="_blank" rel="noopener noreferrer"
                         aria-label="Instagram"
                         class="flex h-9 w-9 items-center justify-center rounded-lg
                                bg-gray-100 text-gray-600 transition
@@ -514,8 +514,8 @@
                 @endif
 
 
-                @if ($setting->telegram)
-                    <a href="{{ $setting->telegram }}" target="_blank" rel="noopener noreferrer"
+                @if ($setting?->telegram)
+                    <a href="{{ $setting?->telegram }}" target="_blank" rel="noopener noreferrer"
                         aria-label="Telegram"
                         class="flex h-9 w-9 items-center justify-center rounded-lg
                                bg-gray-100 text-gray-600 transition
@@ -536,7 +536,7 @@
         {{-- =========================================================
              UAE REGISTRATION / LICENCE
         ========================================================== --}}
-        @if (!empty($setting->license_number))
+        @if (!empty($setting?->license_number))
             <div
                 class="mt-8 rounded-xl border border-gray-200 bg-gray-50 px-5 py-4
                        dark:border-gray-800 dark:bg-gray-900/50">
@@ -562,16 +562,16 @@
 
                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ __('Registration / Licence No.') }}:
-                                {{ $setting->license_number }}
+                                {{ $setting?->license_number }}
                             </p>
 
                         </div>
 
                     </div>
 
-                    @if (!empty($setting->license_authority))
+                    @if (!empty($setting?->license_authority))
                         <span class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ $setting->license_authority }}
+                            {{ $setting?->license_authority }}
                         </span>
                     @endif
 
@@ -591,7 +591,7 @@
 
             <p class="text-xs text-gray-500 dark:text-gray-400">
                 © {{ date('Y') }}
-                {{ app()->getLocale() == 'ar' ? $setting->copyright_ar ?? $setting->copyright : $setting->copyright }}
+                {{ app()->getLocale() == 'ar' ? $setting?->copyright_ar ?? $setting?->copyright : $setting?->copyright }}
             </p>
 
             <p class="text-xs text-gray-400 dark:text-gray-500">
