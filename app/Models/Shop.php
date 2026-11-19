@@ -55,6 +55,8 @@ class Shop extends Model
     protected $dates = ['published_at'];
 
     protected $casts = [
+        'is_completed' => 'boolean',
+        'is_active' => 'boolean',
         'verified' => 'boolean',
         'verified_at' => 'datetime',
         'published_at' => 'datetime',

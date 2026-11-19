@@ -13,7 +13,9 @@ class ShopControllerTest extends TestCase
 
     public function test_step_four_marks_the_shop_as_completed_and_redirects_to_the_shop_preview(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'phone' => '+971500000001',
+        ]);
 
         $user->forceFill(['phone_verified_at' => now()])->save();
         Role::firstOrCreate(['name' => 'seller'], ['display_name' => 'Seller']);
