@@ -5,6 +5,156 @@
 })"
     class="sticky top-0 z-50 w-full border-b border-gray-200/80 backdrop-blur-xl dark:border-gray-800 dark:bg-gray-950/95">
 
+
+    @php
+        $promoLocale = app()->getLocale();
+        $promoIsArabic = str_starts_with($promoLocale, 'ar');
+        $promoText = $promoIsArabic
+            ? ($setting->promo_text_ar ?? '')
+            : ($setting->promo_text_en ?? '');
+
+        $promoStartsAt = $setting->promo_starts_at ?? null;
+        $promoEndsAt = $setting->promo_ends_at ?? null;
+
+        $promoWithinSchedule =
+            (!$promoStartsAt || $promoStartsAt->lte(now())) &&
+            (!$promoEndsAt || $promoEndsAt->gte(now()));
+
+        $promoVisible = (bool) ($setting->promo_enabled ?? false)
+            && filled($promoText)
+            && $promoWithinSchedule;
+
+        $promoAnimation = $setting->promo_animation ?? 'marquee';
+        $promoDuration = max(5, min(120, (int) ($setting->promo_duration ?? 20)));
+        $promoDirection = $promoIsArabic ? 'rtl' : 'ltr';
+    @endphp
+
+    @if ($promoVisible)
+        <style>
+            @keyframes murwaj-promo-marquee-ltr {
+                from { transform: translateX(0); }
+                to { transform: translateX(-50%); }
+            }
+
+            @keyframes murwaj-promo-marquee-rtl {
+                from { transform: translateX(-50%); }
+                to { transform: translateX(0); }
+            }
+
+            @keyframes murwaj-promo-fade {
+                0%, 100% { opacity: .45; }
+                50% { opacity: 1; }
+            }
+
+            .murwaj-promo-track {
+                display: flex;
+                width: max-content;
+                min-width: 200%;
+                animation-timing-function: linear;
+                animation-iteration-count: infinite;
+            }
+
+            .murwaj-promo-track.ltr {
+                animation-name: murwaj-promo-marquee-ltr;
+            }
+
+            .murwaj-promo-track.rtl {
+                animation-name: murwaj-promo-marquee-rtl;
+            }
+
+            .murwaj-promo-fade {
+                animation: murwaj-promo-fade var(--promo-duration) ease-in-out infinite;
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .murwaj-promo-track,
+                .murwaj-promo-fade {
+                    animation: none !important;
+                    transform: none !important;
+                }
+
+                .murwaj-promo-track {
+                    width: 100%;
+                    min-width: 0;
+                    justify-content: center;
+                }
+
+                .murwaj-promo-track span[aria-hidden="true"] {
+                    display: none;
+                }
+            }
+        </style>
+
+        <div
+            x-data="{ visible: true }"
+            x-show="visible"
+            x-cloak
+            data-murwaj-promo
+            dir="{{ $promoDirection }}"
+            class="relative w-full overflow-hidden"
+            style="background-color: {{ $setting->promo_bg_color ?? '#f97316' }}; color: {{ $setting->promo_text_color ?? '#ffffff' }}; --promo-duration: {{ $promoDuration }}s;"
+            role="region"
+            aria-label="{{ $promoIsArabic ? 'إعلان ترويجي' : 'Promotional announcement' }}"
+        >
+            <div class="relative flex h-8 items-center justify-center px-10 sm:h-9 sm:px-12">
+                <div class="w-full overflow-hidden text-center">
+                    @if ($promoAnimation === 'marquee')
+                        <div class="murwaj-promo-track {{ $promoDirection }}"
+                            style="animation-duration: {{ $promoDuration }}s;">
+                            <span class="shrink-0 px-8 text-center text-xs font-semibold">
+                                @if (filled($setting->promo_url ?? null))
+                                    <a href="{{ $setting->promo_url }}" class="transition hover:underline">
+                                        {{ $promoText }}
+                                    </a>
+                                @else
+                                    {{ $promoText }}
+                                @endif
+                            </span>
+
+                            <span aria-hidden="true" class="shrink-0 px-8 text-center text-xs font-semibold">
+                                {{ $promoText }}
+                            </span>
+                        </div>
+                    @elseif ($promoAnimation === 'fade')
+                        <div class="murwaj-promo-fade text-center text-xs font-semibold">
+                            @if (filled($setting->promo_url ?? null))
+                                <a href="{{ $setting->promo_url }}" class="transition hover:underline">
+                                    {{ $promoText }}
+                                </a>
+                            @else
+                                {{ $promoText }}
+                            @endif
+                        </div>
+                    @else
+                        <div class="text-center text-xs font-semibold">
+                            @if (filled($setting->promo_url ?? null))
+                                <a href="{{ $setting->promo_url }}" class="transition hover:underline">
+                                    {{ $promoText }}
+                                </a>
+                            @else
+                                {{ $promoText }}
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                @if ($setting->promo_dismissible ?? true)
+                    <button
+                        type="button"
+                        @click="visible = false"
+                        class="absolute end-1 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full transition hover:bg-black/10 focus:outline-none focus:ring-2 focus:ring-current sm:end-2"
+                        aria-label="{{ $promoIsArabic ? 'إغلاق الإعلان' : 'Close announcement' }}"
+                    >
+                        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                @endif
+            </div>
+        </div>
+    @endif
+
     {{-- =========================
     DESKTOP / MAIN HEADER
     ========================== --}}
