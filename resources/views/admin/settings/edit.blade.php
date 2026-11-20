@@ -594,6 +594,205 @@
 
 
                 {{-- ===================================================== --}}
+
+                {{-- ===================================================== --}}
+                {{-- PROMOTIONAL BANNER --}}
+                {{-- ===================================================== --}}
+
+                <div class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+                    <div class="border-b border-slate-200 px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor"
+                                     stroke-width="1.8" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M3 11.25v1.5a2.25 2.25 0 002.25 2.25H7.5l3.75 4.5v-13.5L7.5 10.5H5.25A2.25 2.25 0 003 12.75z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                          d="M15 9a4.5 4.5 0 010 6m2.25-8.25a7.5 7.5 0 010 10.5"/>
+                                </svg>
+                            </div>
+
+                            <div>
+                                <h2 class="font-semibold text-slate-900">
+                                    Promotional Banner
+                                </h2>
+                                <p class="text-sm text-slate-500">
+                                    Configure the promotional strip displayed above the main website header.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 p-6">
+
+                        {{-- Enable banner --}}
+                        <div class="rounded-xl border border-orange-200 bg-orange-50 p-4">
+                            <input type="hidden" name="promo_enabled" value="0">
+
+                            <label class="flex cursor-pointer items-center gap-3">
+                                <input type="checkbox" name="promo_enabled" value="1"
+                                       class="h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                       {{ old('promo_enabled', $setting->promo_enabled ?? false) ? 'checked' : '' }}>
+
+                                <span>
+                                    <span class="block text-sm font-semibold text-slate-900">
+                                        Enable promotional banner
+                                    </span>
+                                    <span class="mt-1 block text-xs text-slate-600">
+                                        The banner remains hidden when disabled.
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                        {{-- Promotional text --}}
+                        <div class="grid gap-6 md:grid-cols-2">
+                            <div>
+                                <label for="promo_text_en" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Promotional Text (English)
+                                </label>
+                                <input type="text" id="promo_text_en" name="promo_text_en"
+                                       maxlength="255"
+                                       value="{{ old('promo_text_en', $setting->promo_text_en ?? '') }}"
+                                       class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                       placeholder="Discover our latest offers">
+                            </div>
+
+                            <div>
+                                <label for="promo_text_ar" class="mb-2 block text-sm font-semibold text-slate-700">
+                                    Promotional Text (Arabic)
+                                </label>
+                                <input type="text" id="promo_text_ar" name="promo_text_ar"
+                                       maxlength="255" dir="rtl"
+                                       value="{{ old('promo_text_ar', $setting->promo_text_ar ?? '') }}"
+                                       class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                       placeholder="اكتشف أحدث عروضنا">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="promo_url" class="mb-2 block text-sm font-semibold text-slate-700">
+                                Destination URL <span class="font-normal text-slate-400">(Optional)</span>
+                            </label>
+                            <input type="url" id="promo_url" name="promo_url"
+                                   value="{{ old('promo_url', $setting->promo_url ?? '') }}"
+                                   class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                                   placeholder="https://example.com/offer">
+                            <p class="mt-2 text-xs text-slate-400">
+                                Visitors can click the banner to open this destination.
+                            </p>
+                        </div>
+
+                        {{-- Appearance --}}
+                        <div class="border-t border-slate-100 pt-6">
+                            <h3 class="mb-4 text-sm font-semibold text-slate-900">
+                                Appearance & Animation
+                            </h3>
+
+                            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                                <div>
+                                    <label for="promo_bg_color" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Background Color
+                                    </label>
+                                    <input type="color" id="promo_bg_color" name="promo_bg_color"
+                                           value="{{ old('promo_bg_color', $setting->promo_bg_color ?? '#f97316') }}"
+                                           class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white p-1">
+                                </div>
+
+                                <div>
+                                    <label for="promo_text_color" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Text Color
+                                    </label>
+                                    <input type="color" id="promo_text_color" name="promo_text_color"
+                                           value="{{ old('promo_text_color', $setting->promo_text_color ?? '#ffffff') }}"
+                                           class="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white p-1">
+                                </div>
+
+                                <div>
+                                    <label for="promo_animation" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Animation
+                                    </label>
+                                    <select id="promo_animation" name="promo_animation"
+                                            class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                                        <option value="marquee" {{ old('promo_animation', $setting->promo_animation ?? 'marquee') === 'marquee' ? 'selected' : '' }}>
+                                            Moving text
+                                        </option>
+                                        <option value="fade" {{ old('promo_animation', $setting->promo_animation ?? 'marquee') === 'fade' ? 'selected' : '' }}>
+                                            Fade
+                                        </option>
+                                        <option value="static" {{ old('promo_animation', $setting->promo_animation ?? 'marquee') === 'static' ? 'selected' : '' }}>
+                                            Static
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="promo_duration" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Animation Duration (seconds)
+                                    </label>
+                                    <input type="number" id="promo_duration" name="promo_duration"
+                                           min="5" max="120"
+                                           value="{{ old('promo_duration', $setting->promo_duration ?? 20) }}"
+                                           class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Visibility schedule --}}
+                        <div class="border-t border-slate-100 pt-6">
+                            <h3 class="mb-1 text-sm font-semibold text-slate-900">
+                                Display Schedule
+                            </h3>
+                            <p class="mb-4 text-xs text-slate-500">
+                                Leave dates empty to display the banner without a date restriction.
+                                Times use the application timezone.
+                            </p>
+
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <div>
+                                    <label for="promo_starts_at" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        Start Date & Time
+                                    </label>
+                                    <input type="datetime-local" id="promo_starts_at" name="promo_starts_at"
+                                           value="{{ old('promo_starts_at', $setting->promo_starts_at?->format('Y-m-d\TH:i')) }}"
+                                           class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                                </div>
+
+                                <div>
+                                    <label for="promo_ends_at" class="mb-2 block text-sm font-semibold text-slate-700">
+                                        End Date & Time
+                                    </label>
+                                    <input type="datetime-local" id="promo_ends_at" name="promo_ends_at"
+                                           value="{{ old('promo_ends_at', $setting->promo_ends_at?->format('Y-m-d\TH:i')) }}"
+                                           class="block w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Dismiss option --}}
+                        <div class="border-t border-slate-100 pt-5">
+                            <input type="hidden" name="promo_dismissible" value="0">
+
+                            <label class="flex cursor-pointer items-center gap-3">
+                                <input type="checkbox" name="promo_dismissible" value="1"
+                                       class="h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                       {{ old('promo_dismissible', $setting->promo_dismissible ?? true) ? 'checked' : '' }}>
+
+                                <span>
+                                    <span class="block text-sm font-semibold text-slate-800">
+                                        Allow visitors to dismiss the banner
+                                    </span>
+                                    <span class="mt-1 block text-xs text-slate-500">
+                                        Displays a close button on the promotional banner.
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
                 {{-- SAVE BAR --}}
                 {{-- ===================================================== --}}
 
