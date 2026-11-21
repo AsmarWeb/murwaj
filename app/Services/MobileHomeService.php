@@ -12,6 +12,7 @@ use App\Models\Section;
 use App\Models\Shop;
 use App\Services\Catalog\PublicCatalog;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class MobileHomeService
@@ -188,19 +189,40 @@ class MobileHomeService
             'position' => (int) ($section['position'] ?? 0),
         ];
 
-        if (in_array($type, ['products_latest', 'products_featured'], true)) {
+        if (in_array($type, [
+            'products_latest',
+            'products_featured',
+            'products_selected',
+        ], true)) {
             $query = $this->catalog->listings();
 
-            if ($type === 'products_featured') {
-                $query->where('listings.featured', true)
-                    ->orderByDesc('listings.featured_at');
+            if ($type === 'products_selected') {
+                $selectedIds = array_values(array_filter(
+                    array_map('intval', $section['ids'] ?? [])
+                ));
+
+                $items = $query
+                    ->whereIn('listings.id', $selectedIds)
+                    ->limit($limit)
+                    ->get();
+
+                $positions = array_flip($selectedIds);
+
+                $items = $items
+                    ->sortBy(fn ($item) => $positions[$item->id] ?? PHP_INT_MAX)
+                    ->values();
             } else {
-                $query->orderByDesc('listings.id');
+                if ($type === 'products_featured') {
+                    $query->where('listings.featured', true)
+                        ->orderByDesc('listings.featured_at');
+                } else {
+                    $query->orderByDesc('listings.id');
+                }
+
+                $items = $query->limit($limit)->get();
             }
 
-            $result['items'] = ListingResource::collection(
-                $query->limit($limit)->get()
-            )->resolve();
+            $result['items'] = ListingResource::collection($items)->resolve();
 
             return $result;
         }
@@ -273,6 +295,24 @@ class MobileHomeService
                 ->limit($limit)
                 ->get(['id', 'name', 'name_ar', 'slug', 'image'])
                 ->toArray();
+
+            return $result;
+        }
+
+        if ($type === 'banner') {
+            $image = $section['image'] ?? null;
+
+            $result['image'] = is_string($image) && $image !== ''
+                ? (preg_match('/^https?:\\/\\//i', $image)
+                    ? $image
+                    : url(Storage::disk('public')->url($image)))
+                : null;
+
+            $result['content'] = $section['content'] ?? null;
+            $result['content_ar'] = $section['content_ar'] ?? null;
+            $result['button_text'] = $section['button_text'] ?? null;
+            $result['button_text_ar'] = $section['button_text_ar'] ?? null;
+            $result['button_url'] = $section['button_url'] ?? null;
 
             return $result;
         }

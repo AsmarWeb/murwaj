@@ -16,6 +16,7 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link href="{{ route('user.index') }}" :active="request()->routeIs('user.index')">
                         {{ __('Users') }}
@@ -157,6 +158,9 @@
                             <x-dropdown-link href="{{ route('pages.index') }}" :active="request()->routeIs('pages.index')">
                                 {{ __('Pages') }}
                             </x-dropdown-link>
+                            <x-dropdown-link href="{{ route('mobile-home.index') }}" :active="request()->routeIs('mobile-home.*')">
+                                {{ __('Mobile Home') }}
+                            </x-dropdown-link>
                         </x-slot>
                     </x-dropdown>
                 </div>
@@ -226,7 +230,8 @@
                                 <button
                                     class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-gray-300 transition">
                                     <img class="h-8 w-8 rounded-full object-cover"
-                                        src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+                                        src="{{ Auth::user()->profile_photo_url }}"
+                                        alt="{{ Auth::user()->name }}" />
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
@@ -334,6 +339,10 @@
 
             <x-responsive-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('mobile-home.index') }}" :active="request()->routeIs('mobile-home.*')">
+                {{ __('Mobile Home') }}
             </x-responsive-nav-link>
 
             <x-responsive-nav-link href="{{ route('user.index') }}" :active="request()->routeIs('user.index')">
