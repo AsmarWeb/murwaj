@@ -101,11 +101,13 @@ class MobileHomeController extends Controller
                 Rule::in([
                     'products_latest',
                     'products_featured',
+                    'products_selected',
                     'shops_latest',
                     'shops_selected',
                     'categories',
                     'catalog_sections',
                     'editorial',
+                    'banner',
                 ]),
             ],
 
@@ -115,6 +117,7 @@ class MobileHomeController extends Controller
 
             'payload.sections.*.title' => ['nullable', 'string', 'max:160'],
             'payload.sections.*.title_ar' => ['nullable', 'string', 'max:160'],
+            'payload.sections.*.image' => ['nullable', 'string', 'max:2048'],
 
             'payload.sections.*.ids' => ['sometimes', 'array', 'max:50'],
             'payload.sections.*.ids.*' => ['integer', 'min:1', 'distinct'],

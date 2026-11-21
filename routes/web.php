@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\FeatureController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\LeadsController;
 use App\Http\Controllers\Admin\ListingController;
+use App\Http\Controllers\Admin\MobileHomeController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\ProjectExplorerController;
@@ -552,6 +553,17 @@ Route::group(['namespace' => 'App\Http\Controllers\Admin', 'prefix' => 'manage',
     Route::resource('user', UserController::class);
     Route::resource('permission', PermissionController::class);
     Route::resource('role', RoleController::class);
+
+    // Mobile homepage management: Draft, Preview and manual Publish.
+    Route::prefix('mobile-home')->name('mobile-home.')->controller(MobileHomeController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::put('/draft', 'saveDraft')->name('draft');
+        Route::get('/preview', 'preview')->name('preview');
+        Route::post('/publish', 'publish')->name('publish');
+        Route::post('/revisions/{revision}/restore', 'restore')
+            ->whereNumber('revision')
+            ->name('restore');
+    });
 
     Route::resource('shops', ShopsController::class);
     Route::resource('listings', ListingController::class);
