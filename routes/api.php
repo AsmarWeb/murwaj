@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\CustomerCartController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\ListingController;
 use App\Http\Controllers\Api\MobileAuthController;
+use App\Http\Controllers\Api\MobileConfigController;
 use App\Http\Controllers\Api\MobileCheckoutController;
 use App\Http\Controllers\Api\ShopController;
 use App\Http\Controllers\MobileCheckoutReturnController;
@@ -58,6 +59,7 @@ Route::prefix('v1')->name('api.v1.customer.')->middleware([
 Route::middleware([CatalogResponse::class, 'throttle:catalog'])->group(function () {
     Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/openapi.json', fn () => response()->file(base_path('docs/catalog-api-openapi.json'), ['Content-Type' => 'application/json']))->name('openapi');
+        Route::get('/mobile/config', MobileConfigController::class)->name('mobile.config');
         Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
         Route::get('/shops/{slug}', [ShopController::class, 'show'])->name('shops.show');
         Route::get('/shops/{slug}/listings', [ListingController::class, 'forShop'])->name('shops.listings');
@@ -70,3 +72,37 @@ Route::middleware([CatalogResponse::class, 'throttle:catalog'])->group(function 
     Route::get('/listings', [ListingController::class, 'index']);
     Route::get('/listings/{slug}', [ListingController::class, 'show']);
 });
+
+// MOBILE_HOME_API_ROUTES
+Route::middleware([CatalogResponse::class, 'throttle:catalog'])
+    ->prefix('v1/mobile/home')
+    ->name('api.v1.mobile.home.')
+    ->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\MobileHomeController::class, 'show'])
+            ->name('show');
+    });
+
+Route::prefix('v1/admin/mobile/home')
+    ->name('api.v1.admin.mobile.home.')
+    ->middleware([
+        'auth:sanctum',
+        'role:superadministrator|administrator',
+        'throttle:60,1',
+    ])
+    ->group(function () {
+        Route::get('/preview', [\App\Http\Controllers\Api\MobileHomeController::class, 'preview'])
+            ->name('preview');
+
+        Route::put('/draft', [\App\Http\Controllers\Api\MobileHomeController::class, 'draft'])
+            ->name('draft');
+
+        Route::post('/publish', [\App\Http\Controllers\Api\MobileHomeController::class, 'publish'])
+            ->name('publish');
+
+        Route::get('/revisions', [\App\Http\Controllers\Api\MobileHomeController::class, 'revisions'])
+            ->name('revisions');
+
+        Route::post('/restore/{revision}', [\App\Http\Controllers\Api\MobileHomeController::class, 'restore'])
+            ->whereNumber('revision')
+            ->name('restore');
+    });
