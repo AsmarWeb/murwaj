@@ -27,6 +27,10 @@ Route::get('/user', fn (Request $request) => response()->json((new AuthUserResou
 Route::prefix('v1/auth')->name('api.v1.auth.')->middleware(MobileAuthResponse::class)->group(function () {
     Route::post('/register', [MobileAuthController::class, 'register'])->middleware('throttle:mobile-register')->name('register');
     Route::post('/login', [MobileAuthController::class, 'login'])->middleware('throttle:mobile-login')->name('login');
+    Route::post('/social/exchange', [MobileAuthController::class, 'socialExchange'])
+        ->middleware('throttle:mobile-login')->name('social.exchange');
+    Route::post('/social/verify', [MobileAuthController::class, 'socialVerify'])
+        ->middleware('throttle:mobile-login')->name('social.verify');
     Route::middleware(['auth:sanctum', RequireMobileToken::class, 'throttle:mobile-account'])->group(function () {
         Route::get('/me', [MobileAuthController::class, 'me'])->name('me');
         Route::post('/logout', [MobileAuthController::class, 'logout'])->name('logout');
