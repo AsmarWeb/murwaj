@@ -238,4 +238,155 @@ class MobileAuthenticationTest extends TestCase
         $plain = $user->createToken('mobile:Phone', ['mobile:account'], now()->addDay())->plainTextToken;
         $this->get('/shop/edit', ['Authorization' => 'Bearer '.$plain])->assertRedirect(route('login'));
     }
+
+
+    private function socialTicket(User $user): string
+    {
+        $ticket = \Illuminate\Support\Str::random(64);
+
+        Cache::put(
+            'mobile-social-exchange:'.hash('sha256', $ticket),
+            $user->id,
+            now()->addSeconds(90)
+        );
+
+        return $ticket;
+    }
+
+    public function test_social_exchange_issues_token_for_unprotected_account_and_ticket_is_single_use(): void
+    {
+        $user = User::factory()->create();
+        $ticket = $this->socialTicket($user);
+
+        $response = $this->api('POST', '/social/exchange', [
+            'ticket' => $ticket,
+            'device_name' => 'Social test phone',
+        ])->assertOk()
+            ->assertJsonPath('data.user.id', $user->id)
+            ->assertJsonPath('data.token_type', 'Bearer');
+
+        $plain = $response->json('data.access_token');
+
+        $this->assertNotEmpty($plain);
+        $this->assertNotNull(PersonalAccessToken::findToken($plain));
+        $this->assertSame(1, $user->tokens()->count());
+
+        $this->api('POST', '/social/exchange', [
+            'ticket' => $ticket,
+            'device_name' => 'Social test phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('ticket');
+
+        $this->assertSame(1, $user->tokens()->count());
+    }
+
+    public function test_social_exchange_requires_two_factor_before_issuing_a_token(): void
+    {
+        $user = User::factory()->create();
+        $this->enableTwoFactor($user);
+        $ticket = $this->socialTicket($user);
+
+        $response = $this->api('POST', '/social/exchange', [
+            'ticket' => $ticket,
+            'device_name' => 'Protected social phone',
+        ])->assertStatus(202)
+            ->assertJsonPath('data.two_factor_required', true);
+
+        $challenge = $response->json('data.challenge_token');
+
+        $this->assertIsString($challenge);
+        $this->assertMatchesRegularExpression('/\A[A-Za-z0-9]{64}\z/', $challenge);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+
+        $this->api('POST', '/social/exchange', [
+            'ticket' => $ticket,
+            'device_name' => 'Protected social phone',
+        ])->assertUnprocessable()->assertJsonValidationErrors('ticket');
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_social_two_factor_rejects_invalid_code_then_accepts_valid_code_and_consumes_challenge(): void
+    {
+        $user = User::factory()->create();
+        $this->enableTwoFactor($user);
+
+        $ticket = $this->socialTicket($user);
+
+        $challengeResponse = $this->api('POST', '/social/exchange', [
+            'ticket' => $ticket,
+            'device_name' => 'Protected social phone',
+        ])->assertStatus(202);
+
+        $challenge = $challengeResponse->json('data.challenge_token');
+
+        $provider = Mockery::mock(TwoFactorAuthenticationProvider::class);
+        $provider->shouldReceive('verify')
+            ->with('fixture-secret', '111111')
+            ->once()
+            ->andReturn(false);
+        $provider->shouldReceive('verify')
+            ->with('fixture-secret', '123456')
+            ->once()
+            ->andReturn(true);
+
+        $this->app->instance(TwoFactorAuthenticationProvider::class, $provider);
+
+        $this->api('POST', '/social/verify', [
+            'challenge_token' => $challenge,
+            'code' => '111111',
+        ])->assertUnprocessable()->assertJsonValidationErrors('code');
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+
+        $response = $this->api('POST', '/social/verify', [
+            'challenge_token' => $challenge,
+            'code' => '123456',
+        ])->assertOk()
+            ->assertJsonPath('data.user.id', $user->id)
+            ->assertJsonPath('data.token_type', 'Bearer');
+
+        $plain = $response->json('data.access_token');
+
+        $this->assertNotEmpty($plain);
+        $this->assertNotNull(PersonalAccessToken::findToken($plain));
+        $this->assertSame(1, $user->tokens()->count());
+
+        $this->api('POST', '/social/verify', [
+            'challenge_token' => $challenge,
+            'code' => '123456',
+        ])->assertUnprocessable()->assertJsonValidationErrors('challenge_token');
+
+        $this->assertSame(1, $user->tokens()->count());
+    }
+
+    public function test_social_two_factor_recovery_code_is_consumed_and_challenge_is_single_use(): void
+    {
+        $user = User::factory()->create();
+        $this->enableTwoFactor($user);
+
+        $ticket = $this->socialTicket($user);
+
+        $challengeResponse = $this->api('POST', '/social/exchange', [
+            'ticket' => $ticket,
+            'device_name' => 'Recovery test phone',
+        ])->assertStatus(202);
+
+        $challenge = $challengeResponse->json('data.challenge_token');
+
+        $this->api('POST', '/social/verify', [
+            'challenge_token' => $challenge,
+            'recovery_code' => 'recovery-fixture',
+        ])->assertOk()->assertJsonPath('data.user.id', $user->id);
+
+        $this->assertNotContains('recovery-fixture', $user->fresh()->recoveryCodes());
+        $this->assertSame(1, $user->tokens()->count());
+
+        $this->api('POST', '/social/verify', [
+            'challenge_token' => $challenge,
+            'recovery_code' => 'recovery-fixture',
+        ])->assertUnprocessable()->assertJsonValidationErrors('challenge_token');
+
+        $this->assertSame(1, $user->tokens()->count());
+    }
+
 }

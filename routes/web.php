@@ -72,6 +72,10 @@ Route::get('/lang/{locale}', function ($locale) {
 Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])
     ->name('social.redirect');
 
+Route::get('/auth/mobile/{provider}', [SocialAuthController::class, 'mobileRedirect'])
+    ->whereIn('provider', ['google', 'facebook'])
+    ->name('social.mobile.redirect');
+
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])
     ->name('social.callback');
 

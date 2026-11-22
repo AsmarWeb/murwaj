@@ -11,6 +11,7 @@ use App\Models\MobileHomeRevision;
 use App\Models\Section;
 use App\Models\Shop;
 use App\Services\Catalog\PublicCatalog;
+use App\Services\Catalog\PublicFields;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -281,9 +282,9 @@ class MobileHomeService
                 'name' => $category->category_name,
                 'name_ar' => $category->category_name_ar,
                 'slug' => $category->slug,
-                'image' => $category->image,
+                'image' => PublicFields::media($category->image),
                 'section_id' => $category->section_id,
-            ])->all();
+            ])->values()->all();
 
             return $result;
         }
@@ -294,7 +295,15 @@ class MobileHomeService
                 ->orderBy('id')
                 ->limit($limit)
                 ->get(['id', 'name', 'name_ar', 'slug', 'image'])
-                ->toArray();
+                ->map(fn ($item) => [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'name_ar' => $item->name_ar,
+                    'slug' => $item->slug,
+                    'image' => PublicFields::media($item->image),
+                ])
+                ->values()
+                ->all();
 
             return $result;
         }
