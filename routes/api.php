@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CustomerCartController;
 use App\Http\Controllers\Api\CustomerOrderController;
 use App\Http\Controllers\Api\ListingController;
@@ -64,6 +65,7 @@ Route::middleware([CatalogResponse::class, 'throttle:catalog'])->group(function 
     Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/openapi.json', fn () => response()->file(base_path('docs/catalog-api-openapi.json'), ['Content-Type' => 'application/json']))->name('openapi');
         Route::get('/mobile/config', MobileConfigController::class)->name('mobile.config');
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/shops', [ShopController::class, 'index'])->name('shops.index');
         Route::get('/shops/{slug}', [ShopController::class, 'show'])->name('shops.show');
         Route::get('/shops/{slug}/listings', [ListingController::class, 'forShop'])->name('shops.listings');

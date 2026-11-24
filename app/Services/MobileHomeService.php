@@ -33,7 +33,69 @@ class MobileHomeService
             'sections' => [],
         ];
 
-        return $this->render($payload);
+        return $this->render($this->appendDiscoveryDefaults($payload));
+    }
+
+    /**
+     * Keep the customer app discoverable when no homepage rails were configured.
+     * Explicitly configured section types retain their admin settings and order.
+     * Draft preview is intentionally not modified.
+     */
+    private function appendDiscoveryDefaults(array $payload): array
+    {
+        $sections = collect($payload['sections'] ?? [])
+            ->filter(fn ($section) => is_array($section))
+            ->values();
+
+        $configuredTypes = $sections
+            ->pluck('type')
+            ->filter()
+            ->all();
+
+        $nextPosition = ((int) $sections->max(
+            fn ($section) => (int) ($section['position'] ?? 0)
+        )) + 10;
+
+        $defaults = [
+            [
+                'type' => 'categories',
+                'title' => 'Shop by category',
+                'title_ar' => 'تسوّق حسب الفئة',
+                'limit' => 12,
+            ],
+            [
+                'type' => 'shops_latest',
+                'title' => 'Stores to discover',
+                'title_ar' => 'متاجر تستحق الاكتشاف',
+                'limit' => 8,
+            ],
+            [
+                'type' => 'products_latest',
+                'title' => 'New arrivals',
+                'title_ar' => 'وصل حديثاً',
+                'limit' => 8,
+            ],
+        ];
+
+        $fallbackSections = collect($defaults)
+            ->reject(fn ($section) => in_array(
+                $section['type'],
+                $configuredTypes,
+                true
+            ))
+            ->values()
+            ->map(function ($section, $index) use ($nextPosition) {
+                $section['enabled'] = true;
+                $section['position'] = $nextPosition + ($index * 10);
+
+                return $section;
+            });
+
+        $payload['sections'] = $sections
+            ->concat($fallbackSections)
+            ->all();
+
+        return $payload;
     }
 
     public function preview(): array
@@ -264,6 +326,7 @@ class MobileHomeService
             $query = Category::query()
                 ->where('status', 'active')
                 ->where('parent_id', 0)
+                ->whereHas('listings', fn ($listingQuery) => $listingQuery->active())
                 ->orderBy('id');
 
             if (! empty($section['ids'])) {
@@ -282,7 +345,7 @@ class MobileHomeService
                 'name' => $category->category_name,
                 'name_ar' => $category->category_name_ar,
                 'slug' => $category->slug,
-                'image' => PublicFields::media($category->image),
+                'image' => PublicFields::media($category->image, 'category-suggest/'),
                 'section_id' => $category->section_id,
             ])->values()->all();
 

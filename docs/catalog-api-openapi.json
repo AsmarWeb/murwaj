@@ -11,6 +11,54 @@
     }
   ],
   "paths": {
+    "/categories": {
+      "get": {
+        "operationId": "listCategories",
+        "security": [],
+        "description": "Returns all active, non-deleted categories, including categories without published products. Independent of homepage configuration.",
+        "responses": {
+          "200": {
+            "description": "List of active categories.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-API-Version": {
+                "schema": {
+                  "type": "string",
+                  "enum": [
+                    "1"
+                  ]
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Category"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Shared catalog rate limit exhausted."
+          }
+        }
+      }
+    },
     "/shops": {
       "get": {
         "operationId": "listShops",
@@ -1552,6 +1600,41 @@
                 "type": "string"
               }
             }
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "name_ar",
+          "slug",
+          "image",
+          "section_id"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "name_ar": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "section_id": {
+            "type": "integer",
+            "nullable": true
           }
         }
       }
