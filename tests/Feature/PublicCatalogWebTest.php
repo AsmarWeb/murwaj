@@ -39,6 +39,52 @@ class PublicCatalogWebTest extends TestCase
             'published_at' => now()->subDay(), 'expires_at' => now()->addDay()]);
     }
 
+    public function test_public_api_returns_active_categories_even_without_products(): void
+    {
+        $suffix = Str::lower(Str::random(10));
+
+        $emptyCategory = Category::forceCreate([
+            'category_name' => 'Empty category '.$suffix,
+            'category_name_ar' => 'فئة فارغة '.$suffix,
+            'section_name' => 'General',
+            'slug' => 'empty-category-'.$suffix,
+            'status' => 'active',
+        ]);
+
+        Category::forceCreate([
+            'category_name' => 'Inactive category '.$suffix,
+            'category_name_ar' => 'فئة غير نشطة '.$suffix,
+            'section_name' => 'General',
+            'slug' => 'inactive-category-'.$suffix,
+            'status' => 'inactive',
+        ]);
+
+        $deletedCategory = Category::forceCreate([
+            'category_name' => 'Deleted category '.$suffix,
+            'category_name_ar' => 'فئة محذوفة '.$suffix,
+            'section_name' => 'General',
+            'slug' => 'deleted-category-'.$suffix,
+            'status' => 'active',
+        ]);
+
+        DB::table('categories')
+            ->where('id', $deletedCategory->id)
+            ->update(['deleted_at' => now()]);
+
+        $response = $this->getJson('/api/v1/categories')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $emptyCategory->id)
+            ->assertJsonPath('data.0.name', $emptyCategory->category_name)
+            ->assertJsonPath('data.0.name_ar', $emptyCategory->category_name_ar)
+            ->assertJsonPath('data.0.slug', $emptyCategory->slug);
+
+        $this->assertSame(
+            [$emptyCategory->id],
+            collect($response->json('data'))->pluck('id')->all()
+        );
+    }
+
     public function test_guest_can_render_public_product_and_store_in_both_languages(): void
     {
         $shop = $this->shop();
